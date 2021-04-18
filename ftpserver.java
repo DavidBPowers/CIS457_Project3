@@ -149,14 +149,14 @@ public class ftpserver extends Thread {
 		}
         }
     }
-    private initBoard(){
+    private void initBoard(){
             for (int row = 0; row < board.length; row++){
                 for (int col = 0; col < board[0].length; col++){
                     board[row][col] = ' ';
                 }
             }
     }
-    private void placeDiscAt(col){
+    private void placeDiscAt(int col){
             if (!isValidMove(col)){
                 return;
             }
@@ -192,7 +192,7 @@ public class ftpserver extends Thread {
             return true;
     }
     //Do not change disc before checking winner
-    private char checkWinner(col){
+    private char checkWinner(int col){
             int rowMove = 0;
             int colMove = 0;
             int row = findRow(col);
@@ -234,14 +234,15 @@ public class ftpserver extends Thread {
 
 
     }
-    private int findRow(col){
+    private int findRow(int col){
             for (int row = 0; row < board.length; row++){
                 if (board[row][col] != ' '){
                     return row - 1;
                 }
             }
+            return -1;
     }
-    private boolean isValidMove(col){
+    private boolean isValidMove(int col){
             if (findRow(col) < 0){
                 return false;
             }
