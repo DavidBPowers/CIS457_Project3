@@ -39,95 +39,49 @@ class FTPClient {
                 DataOutputStream outToServer = new DataOutputStream(ControlSocket.getOutputStream());
                 DataInputStream inFromServer = new DataInputStream(new BufferedInputStream(ControlSocket.getInputStream()));
 
-                if(sentence.equals("LIST:"))
+                if(sentence.equals("QUIT"))
                 {
-
-                    port = port +2;
+                    clientgo = false;
+                }
+                else {
+                    int column = Integer.parseInt(tokens.nextToken());
                     ServerSocket welcomeData = new ServerSocket(port);
 
-
-                    System.out.println("\n \n \nThe files on this server are:");
                     outToServer.writeBytes (port + " " + sentence + " " + '\n');
 
                     Socket dataSocket = welcomeData.accept();
+
                     DataInputStream inData = new DataInputStream(new BufferedInputStream(dataSocket.getInputStream()));
                     while(notEnd)
                     {
                         modifiedSentence = inData.readUTF();
-                        if(modifiedSentence.equals("eof"))
+                        if(modifiedSentence.equals("accepted"))
+                        {
+                            //place piece in column from sentence
                             break;
-                        System.out.println("	" + modifiedSentence);
+                        }
+                        else if(modifiedSentence.equals("winnerY"))
+                        {
+                            //Client is always yellow - so client wins
+                            break;
+                        }
+                        else if(modifiedSentence.equals("winnerR"))
+                        {
+                            //Server Wins
+                            break;
+                        }
+                        else if(modifiedSentence.equals("tie"))
+                        {
+                            //no one wins
+                            break;
+                        }
+                        else
+                        {
+                            System.out.println("There has been an error in the move you are trying to make");
+                            break;
+                        }
                     }
 
-                    welcomeData.close();
-                    dataSocket.close();
-                    System.out.println("\nWhat would you like to do next: \nRETR: file.txt ||  STOR: file.txt  || QUIT");
-
-                }
-                else if(sentence.startsWith("RETR: ")) {
-		    StringTokenizer tokensretr = new StringTokenizer(sentence);
-                    String fileName = tokensretr.nextToken();
-                    fileName = tokensretr.nextToken();
-                    String curDir = System.getProperty("user.dir");
-                    port = port + 2;
-                    ServerSocket welcomeData = new ServerSocket(port);
-		    outToServer.writeBytes (port + " " + sentence + " " + '\n');
-
-
-                    System.out.println("\n\nDownloading File....");
-
-                    Socket dataSocket = welcomeData.accept();
-
-                    DataInputStream inData = new DataInputStream(new BufferedInputStream(dataSocket.getInputStream()));
-		    File file = new File(curDir + "/" + fileName);
-		    file.createNewFile();
-		    byte[] buffer = new byte[1024];
-                    DataOutputStream dataOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-
-		    while ((inData.read(buffer))!=-1){
-		    	dataOut.write(buffer, 0, buffer.length);
-		    }
-
-                    welcomeData.close();
-                    dataSocket.close();
-                    System.out.println("\n\nFile Downloaded");
-                    System.out.println("\nWhat would you like to do next: \nLIST: ||  STOR: file.txt  || QUIT");
-
-                }
-                else if (sentence.startsWith("STOR: ")){
-		    StringTokenizer tokensstor = new StringTokenizer(sentence);
-                    String fileName = tokensstor.nextToken();
-                    fileName = tokensstor.nextToken();
-                    port = port + 2;
-                    ServerSocket welcomeData = new ServerSocket(port);
-		    outToServer.writeBytes (port + " " + sentence + " " + '\n');
-
-                    System.out.println("\n\nFile uploading to server... Please wait...");
-
-                    Socket dataSocket = welcomeData.accept();
-                    String curDir = System.getProperty("user.dir");
-
-		    File file = new File(curDir + "/" + fileName);
-
-                    DataInputStream inData = new DataInputStream(new FileInputStream(file));
-		    DataOutputStream dataOutToServer = new DataOutputStream(dataSocket.getOutputStream());
-
-                    byte[] buffer = new byte[1024];
-                    while ((inData.read(buffer))!=-1){
-                        dataOutToServer.write(buffer, 0, buffer.length);
-                    }
-
-                    welcomeData.close();
-                    dataSocket.close();
-                    System.out.println("\n\nFile Uploaded");
-                    System.out.println("\nWhat would you like to do next: \nLIST: || RETR: file.txt || QUIT");
-
-                }
-                else {
-                    if (sentence.equals("QUIT")) {
-                        clientgo = false;
-                    }
-                    System.out.print("No server exists with that name or server not listening on that port try agian");
                 }
             }
         }
